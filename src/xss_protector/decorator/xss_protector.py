@@ -1,9 +1,9 @@
 import json
 
 from django.http import JsonResponse
-from utils import silent_delete_from_dictioary
+from ..utils.silent_delete_from_dictioary import silent_delete_from_dictioary
 
-def xss_protection(*keys, lst_invalid_chars=None, lst_exclude_keys=None, response_on_error=None):
+def xss_protector(*keys, lst_invalid_chars=None, lst_exclude_keys=None, response_on_error=None):
     """
     this decorator will search for all invalid chars in a value for xss protection
 
@@ -28,12 +28,15 @@ def xss_protection(*keys, lst_invalid_chars=None, lst_exclude_keys=None, respons
 
     def decorator(function):
         def wrap(request, *args, **kwargs):
+            if request.method == "GET":
+                return function(request, *args, **kwargs)
+
             body = silent_delete_from_dictioary(
                 json.loads(request.body), lst_exclude_keys)
             query_string = silent_delete_from_dictioary(
                 request.GET.dict(), lst_exclude_keys)
             url_params = silent_delete_from_dictioary(kwargs, lst_exclude_keys)
-            form_data = lst_exclude_keys(request.POST.dict(), lst_exclude_keys)
+            form_data = silent_delete_from_dictioary(request.POST.dict(), lst_exclude_keys)
 
             if not keys:
                 # check all possible values
