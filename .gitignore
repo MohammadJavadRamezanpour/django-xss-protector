@@ -1,2 +1,8 @@
 *.token
-test/
+build/
+dist/
+*.egg-info
+setup.py
+src/README.md
+src/LICENSE
+env/
